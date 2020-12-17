@@ -1,26 +1,33 @@
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Scanner;
+import javax.swing.*;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
-public class Main{
+//TODO: Initialize buttons swing
+
+public class Main extends JFrame{
 
     public static void main(String[] args) {
         String files = connect("ls");
         String[] filesystem_split = files.split("\\r?\\n");
 
-        for(int i = 0; i < filesystem_split.length; i++) {
-            createBox(filesystem_split[i]);
-        }
+        initGUI(filesystem_split);
     }
 
-    public static void createBox(String name) {
-        System.out.println(name);
+
+    private static void initGUI(String[] filesystem_split) {
+        JFrame l_Frame= new JFrame("~");
+        for(int i = 0; i < filesystem_split.length; i++) {
+            JButton name = new JButton(filesystem_split[i]);
+            l_Frame.add(name);
+        }
+        l_Frame.setSize(500,500);
+        l_Frame.setVisible(true);
     }
+
 
     public static String connect(String command) {
         String host = "zakariya-rh";
@@ -35,11 +42,6 @@ public class Main{
             session.setPassword(password);
             session.setConfig(config);
             session.connect();
-
-//            Scanner command_input = new Scanner(System.in);
-//            System.out.print(user + "@" + host + ":~$ ");
-//
-//            String command = command_input.nextLine();
 
             Channel channel = session.openChannel("exec");
 
