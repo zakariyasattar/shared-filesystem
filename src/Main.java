@@ -1,12 +1,26 @@
 import java.io.InputStream;
 import javax.swing.*;
+import javax.swing.border.*;
+
+import java.awt.event.*;
+import java.awt.*;
+
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import net.miginfocom.layout.Grid;
+import net.miginfocom.swing.MigLayout;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
-//TODO: Initialize buttons swing
+//TODO: reinitGUI()
 
 public class Main extends JFrame{
 
@@ -15,17 +29,70 @@ public class Main extends JFrame{
         String[] filesystem_split = files.split("\\r?\\n");
 
         initGUI(filesystem_split);
+        //playSong("http://www.ntonyx.com/mp3files/Morning_Flower.mp3");
     }
 
-
     private static void initGUI(String[] filesystem_split) {
-        JFrame l_Frame= new JFrame("~");
+        JFrame frame = new JFrame("~");
+        frame.setSize(500,500);
+
+        JLabel title = new JLabel("Welcome to Shared-Filesystem! Directory: ~", SwingConstants.CENTER);
+        title.setBounds(frame.getWidth()/6, 30, 300, 200);
+        frame.add(title);
+
         for(int i = 0; i < filesystem_split.length; i++) {
+            var directoryName = filesystem_split[i];
             JButton name = new JButton(filesystem_split[i]);
-            l_Frame.add(name);
+            name.setBounds(i*110 + (frame.getWidth()/6), 200, 100, 40);
+
+            name.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    reInitGUI("ls " + directoryName, frame);
+                }
+            });
+            frame.add(name);
         }
-        l_Frame.setSize(500,500);
-        l_Frame.setVisible(true);
+
+        frame.setLayout(null);
+        frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
+    }
+
+    public static void reInitGUI(String command, JFrame frame) {
+//        frame.getContentPane().removeAll();
+//        frame.revalidate();
+//        frame.repaint();
+
+        String files = connect(command);
+        String[] filesystem_split = files.split("\\r?\\n");
+
+        JLabel title = new JLabel("Welcome to Shared-Filesystem! Directory: ~/" + command.split(" ")[1], SwingConstants.CENTER);
+        title.setBounds(frame.getWidth()/6, 30, 300, 200);
+        frame.add(title);
+
+        JPanel panel = new JPanel();
+        BoxLayout boxlayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
+        panel.setLayout(boxlayout);
+        panel.setBorder(new EmptyBorder(new Insets(150, 200, 150, 200)));
+
+        for(int i = 0; i < filesystem_split.length; i++) {
+            var directoryName = filesystem_split[i];
+            JButton name = new JButton(filesystem_split[i]);
+            name.setSize(100, 40);
+
+            name.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    reInitGUI("ls " + directoryName, frame);
+                }
+            });
+
+            panel.add(name);
+        }
+        frame.add(panel);
+        frame.pack();
+        frame.setVisible(true);
     }
 
 
@@ -71,5 +138,19 @@ public class Main extends JFrame{
             e.printStackTrace();
         }
         return "";
+    }
+
+    public static void playSong(String url) {
+        Player mp3player = null;
+        BufferedInputStream in = null;
+        try {
+            in = new BufferedInputStream(new URL(url).openStream());
+            mp3player = new Player(in);
+            mp3player.play();
+        } catch (MalformedURLException ex) {
+        } catch (IOException e) {
+        } catch (JavaLayerException e) {
+        } catch (NullPointerException ex) {
+        }
     }
 }
