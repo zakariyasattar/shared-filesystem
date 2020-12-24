@@ -20,7 +20,8 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
-//TODO: reinitGUI()
+//TODO: reinitGUI(),
+//TODO: add new frame instead of redrawing old one
 
 public class Main extends JFrame{
 
@@ -48,7 +49,8 @@ public class Main extends JFrame{
             name.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    reInitGUI("ls " + directoryName, frame);
+                    reInitGUI("ls ~/" + directoryName);
+                    frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
                 }
             });
             frame.add(name);
@@ -59,15 +61,26 @@ public class Main extends JFrame{
         frame.setLocationRelativeTo(null);
     }
 
-    public static void reInitGUI(String command, JFrame frame) {
-//        frame.getContentPane().removeAll();
-//        frame.revalidate();
-//        frame.repaint();
+    public static void reInitGUI(String command) {
+        JFrame frame = new JFrame(command.split(" ")[1]);
+        frame.setSize(500,500);
+
+        JButton backButton = new JButton("Go Back");
+        backButton.setBounds(10, 10, 100, 30);
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                reInitGUI(command.substring(0, command.lastIndexOf("/")));
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            }
+        });
+
+        frame.add(backButton);
 
         String files = connect(command);
         String[] filesystem_split = files.split("\\r?\\n");
 
-        JLabel title = new JLabel("Welcome to Shared-Filesystem! Directory: ~/" + command.split(" ")[1], SwingConstants.CENTER);
+        JLabel title = new JLabel("Welcome to Shared-Filesystem! Directory: " + command.split(" ")[1], SwingConstants.CENTER);
         title.setBounds(frame.getWidth()/6, 30, 300, 200);
         frame.add(title);
 
@@ -84,7 +97,8 @@ public class Main extends JFrame{
             name.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    reInitGUI("ls " + directoryName, frame);
+                    reInitGUI("ls " + command.split(" ")[1] + "/" + ("\"" + directoryName + "\""));
+                    frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
                 }
             });
 
@@ -93,6 +107,7 @@ public class Main extends JFrame{
         frame.add(panel);
         frame.pack();
         frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
     }
 
 
