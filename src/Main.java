@@ -24,12 +24,13 @@ import com.jcraft.jsch.Session;
 //TODO: add new frame instead of redrawing old one
 
 public class Main extends JFrame{
+    public static String[] filesystem_split;
 
     public static void main(String[] args) {
         String files = connect("ls");
-        String[] filesystem_split = files.split("\\r?\\n");
+        Main.filesystem_split = files.split("\\r?\\n");
 
-        initGUI(filesystem_split);
+        initGUI(Main.filesystem_split);
         //playSong("http://www.ntonyx.com/mp3files/Morning_Flower.mp3");
     }
 
@@ -70,7 +71,13 @@ public class Main extends JFrame{
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                reInitGUI(command.substring(0, command.lastIndexOf("/")));
+                int count = command.length() - command.replace("/", "").length();
+                if(count == 1) {
+                    initGUI(Main.filesystem_split);
+                }
+                else {
+                    reInitGUI(command.substring(0, command.lastIndexOf("/")));
+                }
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             }
         });
